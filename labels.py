@@ -9,7 +9,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 # If modifying these scopes, delete the file token.json.
-SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 
 
 def main():
@@ -45,7 +45,7 @@ def main():
             return
         print('Labels:')
         for label in labels:
-            print(label['name'] + " " + label['id'])
+            print(label['name'] + " - {" + label['id'] + "}")
 
     except HttpError as error:
         # TODO(developer) - Handle errors from gmail API.

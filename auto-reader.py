@@ -39,6 +39,9 @@ async def main():
     # time.
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    if not os.path.exists('label_id'):
+        print("No label_id file found. Please create a file called 'label_id' and paste the ID of the label you want to use.")
+        exit()
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
@@ -58,6 +61,21 @@ async def main():
         results = service.users().messages().list(userId='me').execute()
         messages = results.get('messages', [])
 
+        with open('label_id', 'r') as label_id_file:
+            labelId = label_id_file.read().replace('\n', '')
+
+        labelResults = service.users().labels().list(userId='me').execute()
+        labels = labelResults.get('labels', [])
+
+        labelName = ""
+
+        for label in labels:
+            if(label['id'] == labelId):
+                labelName = label['name']
+        if(labelName == ""):
+            print("No label found with ID: " + labelId)
+            exit()
+
         if not messages:
             print('No messages found.')
             return
@@ -69,6 +87,7 @@ async def main():
         print('  \_____| |_| |_| |_|  \__,_| |_| |_|   /_/    \_\  \__,_|  \__|  \___/           |_|  \_\  \___|  \__,_|  \__,_|  \___| |_|   ')
         print('')
 
+        print("Using label: " + labelName)
         print('Downloading ' + str(len(messages)) + ' most recent messages:')
         #filter out messages that have already been read
         allMessages = messages.copy()
@@ -77,7 +96,7 @@ async def main():
         for message in messages[:]:
             messageContents = service.users().messages().get(userId='me', id=message['id']).execute()
             messageTags = messageContents['labelIds']
-            if 'Label_7984819609366940988' in messageTags:
+            if labelId in messageTags:
                 messages.remove(message)
         
         print(str(len(messages))+  ' un-AutoRead messages found')
@@ -164,10 +183,10 @@ async def main():
                             linkIndex = linkIndex + 1
                             continue
 
-                tagJSON =  '{"addLabelIds":["Label_7984819609366940988"]}'
+                tagJSON =  '{"addLabelIds":["' + labelId + '"]}'
                 tagObject = json.loads(tagJSON)
                 service.users().messages().modify(userId='me', id=message['id'], body=tagObject).execute()
-                print("\n     Message tagged as 'AutoRead'")
+                print("\n     Message tagged as '" + labelName + "")
                 index = index + 1
                 print('')
                 print('')
