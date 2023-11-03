@@ -13,9 +13,6 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 
 
 def main():
-    """Shows basic usage of the Gmail API.
-    Lists the user's Gmail labels.
-    """
     creds = None
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -40,6 +37,8 @@ def main():
         results = service.users().labels().list(userId='me').execute()
         labels = results.get('labels', [])
 
+
+        #Displays user's current inbox labels
         if not labels:
             print('No labels found.')
             return
