@@ -16,4 +16,12 @@ Many companies, unviersities, and organizations use web pixel tracking to detect
 5. Open a terminal to your cloned working directory and run ```labels.py```. On the first run, it will open a webpage to authorize your account using Google OAuth. Click "Continue" if you're told the app hasn't been verified. Once complete, your account token will be stored in a ```token.json``` file in the program directory.
 6. Return to the terminal, and locate the label name you created in Step 4. Copy the label ID displayed to the right (don't include the braces). Store this label ID in a file called ```label_id``` in your working directory.
 
-7. In the same terminal, run ```auto-reader.py``` and follow the instructions in the program.
+7. In the same terminal, run the ```auto-reader.py``` file and follow the instructions in the program.\
+   NOTE: You can specify the number of messages to search as a command line argument following the script filename. If left blank, it will default to 100.
+
+
+### Example
+This will run through the auto reader program using the last 256 messages from your inbox:
+```
+python3 auto-reader.py 256
+```
