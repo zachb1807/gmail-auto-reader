@@ -11,6 +11,7 @@ import base64
 import re
 import aiohttp
 import asyncio
+import sys
 
 #Terminal colors class
 class bcolors:
@@ -27,7 +28,7 @@ class bcolors:
 #Google OAuth scopes
 SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 
-async def main():
+async def main(count):
     creds = None
     linkIndex = 0
     # The file token.json stores the user's access and refresh tokens, and is
@@ -58,7 +59,7 @@ async def main():
         
         #Fetch all messages
         service = build('gmail', 'v1', credentials=creds)
-        results = service.users().messages().list(userId='me').execute()
+        results = service.users().messages().list(userId='me', maxResults=count).execute()
         messages = results.get('messages', [])
 
         #Get label id and name from file
@@ -84,6 +85,10 @@ async def main():
         print(' | |__| | | | | | | | | (_| | | | | |    / ____ \  | |_| | | |_  | (_) |          | | \ \  |  __/ | (_| | | (_| | |  __/ | |   ')
         print('  \_____| |_| |_| |_|  \__,_| |_| |_|   /_/    \_\  \__,_|  \__|  \___/           |_|  \_\  \___|  \__,_|  \__,_|  \___| |_|   ')
         print('')
+        
+        if(len(messages) < count):
+            print(bcolors.WARNING + 'NOTE: Only ' + str(len(messages)) + ' messages found.' + bcolors.ENDC + "\n")
+            
 
         print("Using label: " + labelName)
         print('Downloading ' + str(len(messages)) + ' most recent messages:')
@@ -178,6 +183,10 @@ async def main():
                             print(bcolors.FAIL + " "*10 + "-SSL Error: " + link + bcolors.ENDC)
                             linkIndex = linkIndex + 1
                             continue
+                        except aiohttp.client_exceptions.InvalidURL:
+                            print(bcolors.FAIL + " "*10 + "-Invalid URL: " + link + bcolors.ENDC)
+                            linkIndex = linkIndex + 1
+                            continue
 
                 #Tag completed emails with specified label
                 tagJSON =  '{"addLabelIds":["' + labelId + '"]}'
@@ -204,8 +213,12 @@ async def main():
 
 
 if __name__ == '__main__':
+    if(len(sys.argv) < 2):
+        count = 100;
+    else:
+        count = int(sys.argv[1])
     try:
-        asyncio.run(main())
+        asyncio.run(main(count))
     except KeyboardInterrupt:
         print("Quitting...")
         exit()
